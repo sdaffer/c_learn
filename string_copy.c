@@ -1,7 +1,11 @@
 #include <stdio.h>
 
 void safe_strcpy(char *src, char *dest, int dest_size) {
-    if (dest_size <= 0) return;
+    int length = sizeof(*src)/sizeof(char);
+    if (dest_size <= 0) {
+        printf("dest_size is <= 0.");
+        return;
+    }
     int count = 0;
     while (*src != '\0' && count < (dest_size - 1)) {
         *dest = *src;
