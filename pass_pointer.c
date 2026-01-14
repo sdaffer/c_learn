@@ -39,8 +39,19 @@ void func_str_decay(char *str_ptr, int str_length) {
     printf("\n");
 }
 
-void func_int(int *int_ptr) {
+void func_int_modify(int *int_ptr) {
     *int_ptr += 3;
+}
+
+// we make the pointer a const int type in case we don't want the actual value
+// to be changed.
+void func_int_read_only(const int *int_ptr) {
+    // notice if we tried to increase the value at the memory address that the
+    // compiler complains. the variable is "read-only."
+    // *int_ptr += 3;
+
+    // we can clearly still access the value though
+    printf("value = %d\n", *int_ptr);
 }
 
 int main() {
@@ -52,11 +63,14 @@ int main() {
     printf("num = %d", num);
     // we pass in the address of num because the function is
     // supposed to take a pointer as a parameter
-    func_int(&num);  
+    func_int_modify(&num);  
     // we should see that the value of num has now changed
-    printf("num = %d", num);
+    printf("num = %d\n", num);
     // i think this is how we would do functions with arrays and structs: we
     // would pass in pointers to those objects
+
+    // we can pass num in without allowing it to be modified
+    func_int_read_only(&num);
     
     return 0;
 }
