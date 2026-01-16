@@ -17,7 +17,9 @@ typedef struct Student_typedef{
 } std_td;
 
 void set_name_from_char_arr(char name_in[], std_td *student_in){
-    int n = sizeof(name_in)/sizeof(char);
+    int n = sizeof(name_in)/sizeof(char); // FIXME: i think this doesn't work
+    // because the char decays to a pointer, so i need to pass in the size of
+    // the name somehow.
     for (int i = 0; i < n; i++){
         // (*student_in).name[i] = name_in[i];
         student_in->name[i] = name_in[i];
@@ -44,7 +46,14 @@ int main(){
     // try to set the name with a loop
     char name[6] = "JakeF.";
     set_name_from_char_arr(name, &jake_td);
-    printf("%s\n", jake_td.name);
+    printf("%s\n\n", jake_td.name);
+
+    // it's also possible to set the struct fields like this. i like this much
+    // much better.
+    std_td jerry_td = {.age = 40, .gpa = 3.2, .name = "Jerry"};
+    printf("%i\n", jerry_td.age);
+    printf("%f\n", jerry_td.gpa);
+    printf("%s\n", jerry_td.name);
 
     printf("\ndone\n");
     return 0;

@@ -1,0 +1,9 @@
+// for c23 standard. apparently the most widely used version of c is c99, so
+// beware when going to older hardware and embedded systems that only support
+// c99.
+gcc -Wall -Wextra -std=c23 -pedantic foo.c
+
+// also note that ubuntu still comes with gcc-13 by default. install gcc-14 via
+sudo apt install gcc-14 g++14
+// and then compile with
+gcc-14 -Wall -Wextra -std=c23 -pedantic foo.c

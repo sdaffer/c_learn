@@ -3,8 +3,12 @@
         {
             "type": "cppbuild",
             "label": "C/C++: gcc build active file",
-            "command": "/usr/bin/gcc",
+            "command": "/usr/bin/gcc-14",
             "args": [
+                "-Wall",
+                "-Wextra",
+                "-std=c23",
+                "-pedantic",
                 "-fdiagnostics-color=always",
                 "-g",
                 "${file}",

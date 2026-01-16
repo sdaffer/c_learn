@@ -1,0 +1,27 @@
+i think you'll need to understand malloc to do the ffts.
+
+reading list:
+x https://beej.us/guide/bgc/html/split/hello-world.html#hello-world
+https://beej.us/guide/bgc/html/split/variables-and-statements.html#variables-and-statements
+https://beej.us/guide/bgc/html/split/functions.html#functions
+https://beej.us/guide/bgc/html/split/pointers.html#pointers
+https://beej.us/guide/bgc/html/split/arrays.html#arrays
+https://beej.us/guide/bgc/html/split/strings.html#strings
+https://beej.us/guide/bgc/html/split/structs.html#structs
+https://beej.us/guide/bgc/html/split/file-inputoutput.html#file-inputoutput
+https://beej.us/guide/bgc/html/split/typedef-making-new-types.html#typedef-making-new-types
+https://beej.us/guide/bgc/html/split/pointers2.html#pointers2
+https://beej.us/guide/bgc/html/split/manual-memory-allocation.html#manual-memory-allocation
+https://beej.us/guide/bgc/html/split/scope.html#scope
+https://beej.us/guide/bgc/html/split/types-ii-way-more-types.html#types-ii-way-more-types
+https://beej.us/guide/bgc/html/split/types-iii-conversions.html#types-iii-conversions
+https://beej.us/guide/bgc/html/split/types-iv-qualifiers-and-specifiers.html#types-iv-qualifiers-and-specifiers
+https://beej.us/guide/bgc/html/split/complex-numbers.html#complex-numbers
+
+a little more advanced reading:
+https://beej.us/guide/bgc/html/split/enumerated-types-enum.html#enumerated-types-enum
+https://beej.us/guide/bgc/html/split/pointers-iii-pointers-to-pointers-and-more.html#pointers-iii-pointers-to-pointers-and-more
+https://beej.us/guide/bgc/html/split/variable-length-arrays-vlas.html#variable-length-arrays-vlas
+https://beej.us/guide/bgc/html/split/arrays-part-ii.html#arrays-part-ii
+https://beej.us/guide/bgc/html/split/date-and-time-functionality.html#date-and-time-functionality
+https://beej.us/guide/bgc/html/split/multithreading.html#multithreading
