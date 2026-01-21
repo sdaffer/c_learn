@@ -7,3 +7,10 @@ gcc -Wall -Wextra -std=c23 -pedantic foo.c
 sudo apt install gcc-14 g++14
 // and then compile with
 gcc-14 -Wall -Wextra -std=c23 -pedantic foo.c
+
+// if using math.h, you need to link with the math library on unix like systems
+// because the complier doesn't automatically do so. just add -lm flag. it
+// sounds like the reason is to avoid linking a bunch of floating point code if
+// it's not necessary. and i guess this means that the compiler doesn't
+// automatically link whatever you #inlcude.
+gcc-14 -Wall -Wextra -std=c23 -pedantic foo.c -lm

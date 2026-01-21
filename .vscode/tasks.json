@@ -13,7 +13,8 @@
                 "-g",
                 "${file}",
                 "-o",
-                "${fileDirname}/${fileBasenameNoExtension}"
+                "${fileDirname}/${fileBasenameNoExtension}",
+                "-lm"  // to link the math library so i can use it
             ],
             "options": {
                 "cwd": "${fileDirname}"
