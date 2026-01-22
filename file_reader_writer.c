@@ -14,7 +14,7 @@ void file_reader(const char* f_name) {
     } else {
         printf("opening file\n");
         char buffer[255];  // i think 255 because the null terminator is 1 char
-        // while conditions are true of there is anything other than 0 or NULL,
+        // while conditions are true if there is anything other than 0 or NULL,
         // and fgets returns NULL when there's an error or end of file, so
         // that's part of why this works.
         // also the char array called buffer undergoes pointer decay when it is
