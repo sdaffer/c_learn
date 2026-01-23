@@ -11,5 +11,7 @@
 // specific fourier transform algorithm. yours will just be a DFT at first.
 
 int main() {
+    char f_path[] = "/home/jfeltman/data/test_funcs/10hz_3amp_10s.csv";
+    read_csv(f_path);
     return 0;
 }
