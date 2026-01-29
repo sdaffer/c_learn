@@ -1,21 +1,42 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+
+// TODO: you need to allocate memory for dat_c_arr, but how to you do this if
+// you don't know the size before reading the file? you can either do: 
+//  a first pass over the file to get the number of values and then allocate
+//  memory, and then loop over the file again to assign values to that memory.
+// or:
+//  you can keep reallocating memory thus growing the allocation dynamically. a
+//  memory cheap way to do this is to double the ammount you reallocate every
+//  time you reach the capacity of the current allocation.
+
 // TODO: you'll have to deal with if the numbers in the file have too many or
 // not enough digits.
 
-// TODO: understand gpt's code in the comments at the end. i really like that
-// stucture better as long as i can understand it. there's some new stuff in
-// there that i've never used before.
 
+typedef enum {
+    LINE_COMMENT,
+    LINE_DATA,
+    // LINE_ERROR,  // don't really know how to implement this right now
+    // LINE_EMPTY,  // don't really know how to implement this right now
+} line_types;
 
-void line_parser(char* line) {
+typedef struct dat_arr {
+    double* real_ptr;
+    size_t len;  // int can overflow for large numbers. size_t avoids this
+    size_t cap;  // allocaiton capacity
+} dat_arr;
+
+// int handle_mem_capacity(dat_c_arr** data, ) {
+
+// }
+
+line_types line_parser(char* line, double* val) {
     // TODO: add support for multiple columns
+    // TODO: add support for LINE_ERROR and LINE_EMPTY
     if (line[0] == '#') {
-        printf("comment = '%s'\n", line);
-        line = "";
-        printf("comment = '%s'\n", line);
-        return;
+        return LINE_COMMENT;
     } else {
 
         // we'll use the strtod() function because it's literally built to
@@ -33,12 +54,16 @@ void line_parser(char* line) {
         // printf("%c\n", *endptr);
 
         char* endptr;
-        double val = strtod(line, &endptr);
-        return;
+        // TODO: strtod error checking
+        *val = strtod(line, &endptr);
+        return LINE_DATA;
     }
 }
 
 void read_csv(const char* f_path) {
+    // TODO: implement parsing imaginary parts. currently only works for real
+    // values.
+
     // define pointer of type FILE (from stdio.h)
     FILE* fptr;
     // fopen() on the path with read mode. it will return the pointer if
@@ -49,10 +74,48 @@ void read_csv(const char* f_path) {
         return;
     } else {
         char buffer[255];
+        double val;
+        size_t i = 0;
+        dat_arr data = {NULL, 0, 1};
+
+        // allocate for one value first
+        data.real_ptr = malloc(data.cap*sizeof(*data.real_ptr));
+        if (data.real_ptr == NULL) {
+            fprintf(stderr, "memory allocation failed\n");
+            return;
+        }
+
+        // TODO: gpt says that fgets can cause a truncation error for long lines
+        // but getline() (POSIX) works with arbitrary line lengths? but it also
+        // doesn't work on windows?
         while (fgets(buffer, sizeof(buffer)/sizeof(buffer[0]), fptr)) {
-            line_parser(buffer);
+            line_types type = line_parser(buffer, &val);
+            if (type == LINE_DATA) {
+                // printf("%f\n", val);
+                // reallocate memory if we will be at or above capacity
+                if (i + 1 > data.cap) {
+                    data.cap = 2*data.cap;
+                    double* new_ptr = realloc(data.real_ptr,
+                        data.cap*sizeof(*data.real_ptr));
+                    if (new_ptr == NULL) {
+                        fprintf(stderr, "memory allocation failed\n");
+                        return;
+                    }
+                    data.real_ptr = new_ptr;
+                    printf("realloc()\n");
+                }
+                data.real_ptr[i] = val;
+                i++;
+                data.len = i; 
+            }
         }
         fclose(fptr);
+
+        // just checking if everything is correct here
+        // for (size_t i = 0; i < data.len; i++) {
+        //     printf("%f\n", data.real_ptr[i]);
+        // }
+        // printf("data.len = %d\n", data.len);
     }
 }
 
@@ -60,75 +123,3 @@ void write_csv() {
     // TODO: needs to write 2d data because we have the real and imag parts.
     // TODO: later come back to try real and imaginary parts interleaved.
 }
-
-
-// gpt code to understand:
-// typedef enum {
-    // LINE_EMPTY,
-    // LINE_COMMENT,
-    // LINE_DATA,
-    // LINE_ERROR
-// } line_type_t;
-
-// line_type_t parse_line(
-    // const char *line,
-    // double *values,
-    // size_t max_values,
-    // size_t *num_values
-// );
-
-// #include <ctype.h>
-// #include <errno.h>
-
-// line_type_t parse_line(
-    // const char *line,
-    // double *values,
-    // size_t max_values,
-    // size_t *num_values
-// ) {
-    // *num_values = 0;
-
-    // // skip leading whitespace
-    // while (isspace((unsigned char)*line)) line++;
-
-    // if (*line == '\0')
-        // return LINE_EMPTY;
-
-    // if (*line == '#')
-        // return LINE_COMMENT;
-
-    // char *end;
-    // errno = 0;
-
-    // double v = strtod(line, &end);
-
-    // if (end == line || errno != 0)
-        // return LINE_ERROR;
-
-    // values[0] = v;
-    // *num_values = 1;
-
-    // return LINE_DATA;
-// }
-
-// void read_csv(const char *path) {
-    // FILE *f = fopen(path, "r");
-    // if (!f) {
-        // perror("fopen");
-        // return;
-    // }
-
-    // char buffer[256];
-    // double values[16];
-    // size_t n;
-
-    // while (fgets(buffer, sizeof buffer, f)) {
-        // line_type_t type = parse_line(buffer, values, 16, &n);
-
-        // if (type == LINE_DATA) {
-            // printf("value = %.10f\n", values[0]);
-        // }
-    // }
-
-    // fclose(f);
-// }
