@@ -2,17 +2,11 @@
 #include <stdlib.h>
 
 
-// TODO: you need to allocate memory for dat_c_arr, but how to you do this if
-// you don't know the size before reading the file? you can either do: 
-//  a first pass over the file to get the number of values and then allocate
-//  memory, and then loop over the file again to assign values to that memory.
-// or:
-//  you can keep reallocating memory thus growing the allocation dynamically. a
-//  memory cheap way to do this is to double the ammount you reallocate every
-//  time you reach the capacity of the current allocation.
-
 // TODO: you'll have to deal with if the numbers in the file have too many or
 // not enough digits.
+
+
+#define MAX_ALLOC_SIZE 1000000000  // 1 Gb
 
 
 typedef enum {
@@ -25,12 +19,9 @@ typedef enum {
 typedef struct dat_arr {
     double* real_ptr;
     size_t len;  // int can overflow for large numbers. size_t avoids this
-    size_t cap;  // allocaiton capacity
+    size_t cap;  // allocation capacity
 } dat_arr;
 
-// int handle_mem_capacity(dat_c_arr** data, ) {
-
-// }
 
 line_types line_parser(char* line, double* val) {
     // TODO: add support for multiple columns
@@ -59,11 +50,26 @@ line_types line_parser(char* line, double* val) {
         return LINE_DATA;
     }
 }
+int handle_mem_cap(double** ptr_ptr, size_t len, size_t* cap) {
+    if (len + 1 > *cap) {
+        size_t new_cap = 2*(*cap);
+        // check to make sure we aren't trying to allocate more than max size
+        // TODO: we probably want to fix this because if we are always doubling
+        // then when we currently have a bit more than half the max size, this
+        // check will cause return -1. how else can we handle this?
+        if (new_cap > MAX_ALLOC_SIZE/sizeof(**ptr_ptr)) return -1;
+        double* new_ptr = realloc(*ptr_ptr, new_cap*sizeof(**ptr_ptr));
+        if (new_ptr == NULL) {
+            fprintf(stderr, "memory allocation failed\n");
+            return -1;
+        }
+        *cap = new_cap;
+        *ptr_ptr = new_ptr;
+    }
+    return 0;
+}
 
-void read_csv(const char* f_path) {
-    // TODO: implement parsing imaginary parts. currently only works for real
-    // values.
-
+int read_csv(const char* f_path) {
     // define pointer of type FILE (from stdio.h)
     FILE* fptr;
     // fopen() on the path with read mode. it will return the pointer if
@@ -71,52 +77,42 @@ void read_csv(const char* f_path) {
     fptr = fopen(f_path, "r");
     if (fptr == NULL) {
         printf("error opening file '%s'\n", f_path);
-        return;
-    } else {
-        char buffer[255];
-        double val;
-        size_t i = 0;
-        dat_arr data = {NULL, 0, 1};
-
-        // allocate for one value first
-        data.real_ptr = malloc(data.cap*sizeof(*data.real_ptr));
-        if (data.real_ptr == NULL) {
-            fprintf(stderr, "memory allocation failed\n");
-            return;
-        }
-
-        // TODO: gpt says that fgets can cause a truncation error for long lines
-        // but getline() (POSIX) works with arbitrary line lengths? but it also
-        // doesn't work on windows?
-        while (fgets(buffer, sizeof(buffer)/sizeof(buffer[0]), fptr)) {
-            line_types type = line_parser(buffer, &val);
-            if (type == LINE_DATA) {
-                // printf("%f\n", val);
-                // reallocate memory if we will be at or above capacity
-                if (i + 1 > data.cap) {
-                    data.cap = 2*data.cap;
-                    double* new_ptr = realloc(data.real_ptr,
-                        data.cap*sizeof(*data.real_ptr));
-                    if (new_ptr == NULL) {
-                        fprintf(stderr, "memory allocation failed\n");
-                        return;
-                    }
-                    data.real_ptr = new_ptr;
-                    printf("realloc()\n");
-                }
-                data.real_ptr[i] = val;
-                i++;
-                data.len = i; 
-            }
-        }
-        fclose(fptr);
-
-        // just checking if everything is correct here
-        // for (size_t i = 0; i < data.len; i++) {
-        //     printf("%f\n", data.real_ptr[i]);
-        // }
-        // printf("data.len = %d\n", data.len);
+        return -1;
     }
+
+    char buffer[255];
+    double val;
+    size_t i = 0;
+    dat_arr data = {NULL, 0, 1};
+
+    // allocate for one value first
+    data.real_ptr = malloc(data.cap*sizeof(*data.real_ptr));
+    if (data.real_ptr == NULL) {
+        fprintf(stderr, "memory allocation failed\n");
+        return -1;
+    }
+
+    // NOTE: gpt says that fgets can cause a truncation error for long lines
+    // (because the buffer can overflow, but getline() (POSIX) works with
+    // arbitrary line lengths? but it also doesn't work on windows.
+    while (fgets(buffer, sizeof(buffer)/sizeof(buffer[0]), fptr)) {
+        line_types type = line_parser(buffer, &val);
+        if (type == LINE_DATA) {
+            // realocate memory if adding this value to the array will put us
+            // above our current memory allocation
+            handle_mem_cap(&data.real_ptr, data.len, &data.cap);
+            data.real_ptr[i] = val;
+            i++;
+            data.len = i; 
+            }
+            // data.real_ptr[i] = val;
+            // i++;
+            // data.len = i; 
+        }
+    fclose(fptr);
+    // TODO: free memory when done
+    printf("success\n");
+    return 0;
 }
 
 void write_csv() {
