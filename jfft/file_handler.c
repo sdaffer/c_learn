@@ -1,5 +1,9 @@
+#include "file_handler.h"
+
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "data_structs.h"
 
 
 // TODO: you'll have to deal with if the numbers in the file have too many or
@@ -7,20 +11,6 @@
 
 
 #define MAX_ALLOC_SIZE 1000000000  // 1 Gb
-
-
-typedef enum {
-    LINE_COMMENT,
-    LINE_DATA,
-    // LINE_ERROR,  // don't really know how to implement this right now
-    // LINE_EMPTY,  // don't really know how to implement this right now
-} line_types;
-
-typedef struct dat_arr {
-    double* real_ptr;
-    size_t len;  // int can overflow for large numbers. size_t avoids this
-    size_t cap;  // allocation capacity
-} dat_arr;
 
 
 line_types line_parser(char* line, double* val) {
@@ -50,14 +40,16 @@ line_types line_parser(char* line, double* val) {
         return LINE_DATA;
     }
 }
-int handle_mem_cap(double** ptr_ptr, size_t len, size_t* cap) {
+int handle_mem_cap(double** ptr_ptr, size_t len, size_t* cap, size_t max_cap) {
     if (len + 1 > *cap) {
         size_t new_cap = 2*(*cap);
         // check to make sure we aren't trying to allocate more than max size
         // TODO: we probably want to fix this because if we are always doubling
         // then when we currently have a bit more than half the max size, this
         // check will cause return -1. how else can we handle this?
-        if (new_cap > MAX_ALLOC_SIZE/sizeof(**ptr_ptr)) return -1;
+        // if (new_cap > MAX_ALLOC_SIZE/sizeof(**ptr_ptr)) return -1;
+        if (*cap == max_cap) return -1;
+        if (new_cap > max_cap) new_cap = MAX_ALLOC_SIZE;
         double* new_ptr = realloc(*ptr_ptr, new_cap*sizeof(**ptr_ptr));
         if (new_ptr == NULL) {
             fprintf(stderr, "memory allocation failed\n");
@@ -69,7 +61,10 @@ int handle_mem_cap(double** ptr_ptr, size_t len, size_t* cap) {
     return 0;
 }
 
-int read_csv(const char* f_path) {
+dat_arr read_csv(const char* f_path) {
+
+    dat_arr data = {NULL, 0, 0};
+
     // define pointer of type FILE (from stdio.h)
     FILE* fptr;
     // fopen() on the path with read mode. it will return the pointer if
@@ -77,19 +72,20 @@ int read_csv(const char* f_path) {
     fptr = fopen(f_path, "r");
     if (fptr == NULL) {
         printf("error opening file '%s'\n", f_path);
-        return -1;
+        return data;
     }
 
     char buffer[255];
     double val;
     size_t i = 0;
-    dat_arr data = {NULL, 0, 1};
+    size_t max_cap = MAX_ALLOC_SIZE/sizeof(*data.real_ptr);
+    data.cap = 1; // mem alloc alg. can't have this be 0.
 
     // allocate for one value first
     data.real_ptr = malloc(data.cap*sizeof(*data.real_ptr));
     if (data.real_ptr == NULL) {
         fprintf(stderr, "memory allocation failed\n");
-        return -1;
+        return data;
     }
 
     // NOTE: gpt says that fgets can cause a truncation error for long lines
@@ -100,22 +96,28 @@ int read_csv(const char* f_path) {
         if (type == LINE_DATA) {
             // realocate memory if adding this value to the array will put us
             // above our current memory allocation
-            handle_mem_cap(&data.real_ptr, data.len, &data.cap);
+            handle_mem_cap(&data.real_ptr, data.len, &data.cap, max_cap);
             data.real_ptr[i] = val;
             i++;
             data.len = i; 
             }
-            // data.real_ptr[i] = val;
-            // i++;
-            // data.len = i; 
         }
+    // reallocate to the exact amount of memory you need now that you know
+    // exactly how much you need.
+    double* new_ptr = realloc(data.real_ptr, i*sizeof(data.real_ptr[0]));
+    if (new_ptr == NULL) {
+        fprintf(stderr, "memory allocation failed\n");
+    }
+    data.real_ptr = new_ptr;
+
     fclose(fptr);
     // TODO: free memory when done
-    printf("success\n");
-    return 0;
+
+    return data;
 }
 
-void write_csv() {
-    // TODO: needs to write 2d data because we have the real and imag parts.
-    // TODO: later come back to try real and imaginary parts interleaved.
-}
+// void write_csv() {
+//     // TODO: needs to write 2d data because we have the real and imag parts.
+//     TODO: later come back to try real and imaginary parts interleaved.
+//     return NULL;
+// }
