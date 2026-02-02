@@ -119,8 +119,21 @@ dat_c_arr read_csv_dat_c_arr(const char* f_path) {
     return data;
 }
 
-// int write_dat_c_arr_csv(dat_c_arr* data, char* f_path) {
-//     // TODO: needs to write 2d data because we have the real and imag parts.
-// 
-//     return 0;
-// }
+int write_dat_c_arr_csv(dat_c_arr* data, char* f_path) {
+    // TODO: write the imaginary part in the second column
+    FILE* fptr;
+    fptr = fopen(f_path, "w");
+    if (fptr == NULL) {
+        printf("error opening file '%s'\n", f_path);
+        return -1;
+    }
+
+    // output up to the last line because we don't want a \n on the last line
+    for (size_t i = 0; i < data->len - 1; i++){
+        fprintf(fptr, "%f\n", data->real_ptr[i]);
+    }
+    // output the last line without a \n
+    fprintf(fptr, "%f", data->real_ptr[data->len - 1]);
+    fclose(fptr);
+    return 0;
+}

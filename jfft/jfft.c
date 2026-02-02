@@ -28,11 +28,9 @@ void free_null_dat_c_arr_mem(dat_c_arr* data) {
 
 int main() {
     char f_path_read[] = "/home/jfeltman/data/test_funcs/10hz_3amp_10s.csv";
-    // char f_path_write[] = "/home/jfeltman/data/test_funcs/10hz_3amp_10s_o.csv";
+    char f_path_write[] = "/home/jfeltman/data/test_funcs/10hz_3amp_10s_o.csv";
     dat_c_arr data = read_csv_dat_c_arr(f_path_read);  // free the array when done;
-    // write_dat_c_arr_csv(&data, f_path_write);
-    // free_null_data_arr_mem((void**) &data.real_ptr);
+    write_dat_c_arr_csv(&data, f_path_write);
     free_null_dat_c_arr_mem(&data);
-    printf("sucess\n");
     return 0;
 }
