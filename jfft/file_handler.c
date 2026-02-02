@@ -9,6 +9,9 @@
 // TODO: you'll have to deal with if the numbers in the file have too many or
 // not enough digits.
 
+// TODO: change the read file to a complex dat_c_arr, but only load the real
+// part. so everything needs to be complex.
+
 
 #define MAX_ALLOC_SIZE 1000000000  // 1 Gb
 
@@ -61,9 +64,9 @@ int handle_mem_cap(double** ptr_ptr, size_t len, size_t* cap, size_t max_cap) {
     return 0;
 }
 
-dat_arr read_csv(const char* f_path) {
+dat_c_arr read_csv_dat_c_arr(const char* f_path) {
 
-    dat_arr data = {NULL, 0, 0};
+    dat_c_arr data = {NULL, NULL, 0, 0};
 
     // define pointer of type FILE (from stdio.h)
     FILE* fptr;
@@ -116,8 +119,8 @@ dat_arr read_csv(const char* f_path) {
     return data;
 }
 
-// void write_csv() {
+// int write_dat_c_arr_csv(dat_c_arr* data, char* f_path) {
 //     // TODO: needs to write 2d data because we have the real and imag parts.
-//     TODO: later come back to try real and imaginary parts interleaved.
-//     return NULL;
+// 
+//     return 0;
 // }
