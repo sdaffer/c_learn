@@ -20,10 +20,8 @@
 
 void free_null_dat_c_arr_mem(dat_c_arr* data) {
     // is this the way to do this?
-    free(data->real_ptr);
-    free(data->imag_ptr);
-    data->real_ptr = NULL;
-    data->imag_ptr = NULL;
+    free(data->data_ptr);
+    data->data_ptr = NULL;
 }
 
 int main() {

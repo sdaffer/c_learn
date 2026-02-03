@@ -16,7 +16,7 @@
 #define MAX_ALLOC_SIZE 1000000000  // 1 Gb
 
 
-line_types line_parser(char* line, double* val) {
+line_types line_parser(char* line, double* real_val, double* imag_val) {
     // TODO: add support for multiple columns
     // TODO: add support for LINE_ERROR and LINE_EMPTY
     if (line[0] == '#') {
@@ -39,18 +39,21 @@ line_types line_parser(char* line, double* val) {
 
         char* endptr;
         // TODO: strtod error checking
-        *val = strtod(line, &endptr);
+        *real_val = strtod(line, &endptr);
+        // printf("%c , ", *endptr);
+        // printf("%c\n", *endptr+1);
+        // *imag_val = strtod(line, &endptr+1);
+        *imag_val = strtod(endptr, NULL);
         return LINE_DATA;
     }
 }
 int handle_mem_cap(double** ptr_ptr, size_t len, size_t* cap, size_t max_cap) {
     if (len + 1 > *cap) {
-        size_t new_cap = 2*(*cap);
+        // size_t new_cap = 2*(*cap);  // double the capacity for dynamic alloc.
+        size_t new_cap = 4*(*cap);  // double the capacity for dynamic
+        // allocation of memory, but remember we have two numbers (real and
+        // imag parts), so we need to multiply by 4.
         // check to make sure we aren't trying to allocate more than max size
-        // TODO: we probably want to fix this because if we are always doubling
-        // then when we currently have a bit more than half the max size, this
-        // check will cause return -1. how else can we handle this?
-        // if (new_cap > MAX_ALLOC_SIZE/sizeof(**ptr_ptr)) return -1;
         if (*cap == max_cap) return -1;
         if (new_cap > max_cap) new_cap = MAX_ALLOC_SIZE;
         double* new_ptr = realloc(*ptr_ptr, new_cap*sizeof(**ptr_ptr));
@@ -66,7 +69,7 @@ int handle_mem_cap(double** ptr_ptr, size_t len, size_t* cap, size_t max_cap) {
 
 dat_c_arr read_csv_dat_c_arr(const char* f_path) {
 
-    dat_c_arr data = {NULL, NULL, 0, 0};
+    dat_c_arr data = {NULL, 0, 0};
 
     // define pointer of type FILE (from stdio.h)
     FILE* fptr;
@@ -79,14 +82,15 @@ dat_c_arr read_csv_dat_c_arr(const char* f_path) {
     }
 
     char buffer[255];
-    double val;
+    double real_val;
+    double imag_val;
     size_t i = 0;
-    size_t max_cap = MAX_ALLOC_SIZE/sizeof(*data.real_ptr);
+    size_t max_cap = MAX_ALLOC_SIZE/sizeof(*data.data_ptr);
     data.cap = 1; // mem alloc alg. can't have this be 0.
 
     // allocate for one value first
-    data.real_ptr = malloc(data.cap*sizeof(*data.real_ptr));
-    if (data.real_ptr == NULL) {
+    data.data_ptr = malloc(data.cap*sizeof(*data.data_ptr));
+    if (data.data_ptr == NULL) {
         fprintf(stderr, "memory allocation failed\n");
         return data;
     }
@@ -95,23 +99,24 @@ dat_c_arr read_csv_dat_c_arr(const char* f_path) {
     // (because the buffer can overflow, but getline() (POSIX) works with
     // arbitrary line lengths? but it also doesn't work on windows.
     while (fgets(buffer, sizeof(buffer)/sizeof(buffer[0]), fptr)) {
-        line_types type = line_parser(buffer, &val);
+        line_types type = line_parser(buffer, &real_val, &imag_val);
         if (type == LINE_DATA) {
             // realocate memory if adding this value to the array will put us
             // above our current memory allocation
-            handle_mem_cap(&data.real_ptr, data.len, &data.cap, max_cap);
-            data.real_ptr[i] = val;
-            i++;
+            handle_mem_cap(&data.data_ptr, data.len, &data.cap, max_cap);
+            data.data_ptr[i] = real_val;
+            data.data_ptr[i+1] = imag_val;
+            i += 2;
             data.len = i; 
             }
         }
     // reallocate to the exact amount of memory you need now that you know
     // exactly how much you need.
-    double* new_ptr = realloc(data.real_ptr, i*sizeof(data.real_ptr[0]));
+    double* new_ptr = realloc(data.data_ptr, i*sizeof(data.data_ptr[0]));
     if (new_ptr == NULL) {
         fprintf(stderr, "memory allocation failed\n");
     }
-    data.real_ptr = new_ptr;
+    data.data_ptr = new_ptr;
 
     fclose(fptr);
     // TODO: free memory when done
@@ -128,12 +133,18 @@ int write_dat_c_arr_csv(dat_c_arr* data, char* f_path) {
         return -1;
     }
 
+    // write the header
+    fprintf(fptr, "# real,imag\n");
+
     // output up to the last line because we don't want a \n on the last line
-    for (size_t i = 0; i < data->len - 1; i++){
-        fprintf(fptr, "%f\n", data->real_ptr[i]);
+    // for (size_t i = 0; i < data->len - 1; i++){
+    for (size_t i = 0; i < data->len - 1; i+=2){
+        // printf("i = %zu\n", i);
+        fprintf(fptr, "%f,", data->data_ptr[i]);
+        fprintf(fptr, "%f\n", data->data_ptr[i+1]);
     }
     // output the last line without a \n
-    fprintf(fptr, "%f", data->real_ptr[data->len - 1]);
+    fprintf(fptr, "%f", data->data_ptr[data->len - 1]);
     fclose(fptr);
     return 0;
 }
