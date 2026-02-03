@@ -12,7 +12,7 @@
 typedef enum {
     LINE_COMMENT,
     LINE_DATA,
-    // LINE_ERROR,  // don't really know how to implement this right now
+    LINE_ERROR,
     // LINE_EMPTY,  // don't really know how to implement this right now
 } line_types;
 

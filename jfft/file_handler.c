@@ -17,8 +17,7 @@
 
 
 line_types line_parser(char* line, double* real_val, double* imag_val) {
-    // TODO: add support for multiple columns
-    // TODO: add support for LINE_ERROR and LINE_EMPTY
+    // parses the line as real, imaginary and erros if there are more ','.
     if (line[0] == '#') {
         return LINE_COMMENT;
     } else {
@@ -40,10 +39,13 @@ line_types line_parser(char* line, double* real_val, double* imag_val) {
         char* endptr;
         // TODO: strtod error checking
         *real_val = strtod(line, &endptr);
-        // printf("%c , ", *endptr);
-        // printf("%c\n", *endptr+1);
-        // *imag_val = strtod(line, &endptr+1);
-        *imag_val = strtod(endptr, NULL);
+        if (*endptr == ',') {
+            *imag_val = strtod(endptr+1, &endptr); // ?
+        } else {
+            *imag_val = 0.0;
+        }
+        // we only support 2 columns
+        if (*endptr == ',') {return LINE_ERROR;}
         return LINE_DATA;
     }
 }
@@ -139,7 +141,6 @@ int write_dat_c_arr_csv(dat_c_arr* data, char* f_path) {
     // output up to the last line because we don't want a \n on the last line
     // for (size_t i = 0; i < data->len - 1; i++){
     for (size_t i = 0; i < data->len - 1; i+=2){
-        // printf("i = %zu\n", i);
         fprintf(fptr, "%f,", data->data_ptr[i]);
         fprintf(fptr, "%f\n", data->data_ptr[i+1]);
     }
