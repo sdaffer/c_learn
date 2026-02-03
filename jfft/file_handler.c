@@ -50,7 +50,7 @@ line_types line_parser(char* line, double* real_val, double* imag_val) {
     }
 }
 int handle_mem_cap(double** ptr_ptr, size_t len, size_t* cap, size_t max_cap) {
-    if (len + 1 > *cap) {
+    if (len + 2 > *cap) {
         // size_t new_cap = 2*(*cap);  // double the capacity for dynamic alloc.
         size_t new_cap = 4*(*cap);  // double the capacity for dynamic
         // allocation of memory, but remember we have two numbers (real and
@@ -140,12 +140,16 @@ int write_dat_c_arr_csv(dat_c_arr* data, char* f_path) {
 
     // output up to the last line because we don't want a \n on the last line
     // for (size_t i = 0; i < data->len - 1; i++){
-    for (size_t i = 0; i < data->len - 1; i+=2){
+    // for (size_t i = 0; i < data->len - 1; i += 2){
+    for (size_t i = 0; i < data->len - 2; i += 2){
         fprintf(fptr, "%f,", data->data_ptr[i]);
         fprintf(fptr, "%f\n", data->data_ptr[i+1]);
     }
     // output the last line without a \n
-    fprintf(fptr, "%f", data->data_ptr[data->len - 1]);
+    // FIXME: this is a problem
+    // fprintf(fptr, "%f", data->data_ptr[data->len - 1]);
+    fprintf(fptr, "%f,", data->data_ptr[data->len - 2]);
+    fprintf(fptr, "%f", data->data_ptr[data->len - 2]);
     fclose(fptr);
     return 0;
 }
