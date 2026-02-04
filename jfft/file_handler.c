@@ -119,6 +119,7 @@ dat_c_arr read_csv_dat_c_arr(const char* f_path) {
         fprintf(stderr, "memory allocation failed\n");
     }
     data.data_ptr = new_ptr;
+    data.cap = i;
 
     fclose(fptr);
     // TODO: free memory when done

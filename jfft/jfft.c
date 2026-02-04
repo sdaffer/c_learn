@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "file_handler.h"
+#include "calc.h"
 #include "data_structs.h"
+#include "file_handler.h"
 
 // TODO: you should allow a command line argument to be the relative or full
 // file path of the csv file containing the function
@@ -12,11 +13,6 @@
 // TODO: your code initially won't actually compute the FFT because that's a
 // specific fourier transform algorithm. yours will just be a DFT at first.
 
-// TODO: make this work by passing in data_c_arr
-// void free_null_data_arr_mem(void** ptr_ptr) {
-//     free(*ptr_ptr);
-//     *ptr_ptr = NULL;
-// }
 
 void free_null_dat_c_arr_mem(dat_c_arr* data) {
     // is this the way to do this?
@@ -32,11 +28,14 @@ int main() {
     dat_c_arr data = read_csv_dat_c_arr(f_path_read);
 
     // calculate fourier transform
+    dat_c_arr dft = calc_fourier_transform(&data);
 
     // write the fourier transfaorm
-    write_dat_c_arr_csv(&data, f_path_write);
+    // write_dat_c_arr_csv(&data, f_path_write);
+    write_dat_c_arr_csv(&dft, f_path_write);
 
     // free the allocated memory
     free_null_dat_c_arr_mem(&data);
+    free_null_dat_c_arr_mem(&dft);
     return 0;
 }
