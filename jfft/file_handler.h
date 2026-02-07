@@ -2,8 +2,8 @@
 #define FILE_HANDLER_H // then define this macro name
 
 
-#include <stddef.h>  // for size_t
 #include "data_structs.h"
+#include <stddef.h>  // for size_t
 
 
 #define MAX_ALLOC_SIZE 1000000000  // 1 GB

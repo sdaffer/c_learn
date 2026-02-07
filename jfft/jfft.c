@@ -4,6 +4,7 @@
 #include "calc.h"
 #include "data_structs.h"
 #include "file_handler.h"
+#include "util.h"
 
 // TODO: you should allow a command line argument to be the relative or full
 // file path of the csv file containing the function
@@ -27,8 +28,16 @@ int main() {
     // load data array from csv
     dat_c_arr data = read_csv_dat_c_arr(f_path_read);
 
+    // testing
+    double max = rmax_dat_c_arr(&data);
+    printf("max = %f\n", max);
+
     // calculate fourier transform
     dat_c_arr dft = calc_fourier_transform(&data);
+
+    // testing
+    double max_a = rmax_dat_c_arr(&dft);
+    printf("max_a = %f\n", max_a);
 
     // write the fourier transfaorm
     // write_dat_c_arr_csv(&data, f_path_write);

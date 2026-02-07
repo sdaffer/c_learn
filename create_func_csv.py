@@ -10,6 +10,11 @@ header_str = f"freq={freq}, amp={amp}, t_max={t_max}, dt={dt}"
 time_arr = np.linspace(0.0, t_max, num=int(t_max/dt))
 func_arr = amp*np.sin(2*np.pi*freq*time_arr)
 # func_arr_test = amp*np.cos(2*np.pi*freq*time_arr)
+
+m = 1.0
+b = time_arr[-1]/2
+# func_arr = m*time_arr + b
+
 save_arr = np.zeros((func_arr.shape[0], 2))
 save_arr[:, 0] = func_arr
 # save_arr[:, 1] = func_arr_test

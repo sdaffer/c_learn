@@ -15,7 +15,6 @@ dat_c_arr calc_fourier_transform(dat_c_arr* data) {
     for (size_t k = 0; k < dft.len; k += 2) {
         double sum_real = 0.0;
         double sum_imag = 0.0;
-
         for (size_t n = 0; n < dft.len; n += 2) {
             // something's not right here (maybe). i get nonzero amplitudes, but
             // it always sums to 0 somehow.
@@ -24,15 +23,6 @@ dat_c_arr calc_fourier_transform(dat_c_arr* data) {
             sum_real += xn*cos(arg);
             sum_imag += xn*sin(arg);
         }
-        // printf("%f, ", sum_real);
-        // printf("%f\n", sum_imag);
-        if (fabs(sum_real) > 0.00001) {
-            printf("pass real\n");
-        }
-        if (fabs(sum_imag) > 0.00001) {
-            printf("pass imag\n");
-        }
-
         dft.data_ptr[k] = sum_real;
         dft.data_ptr[k+1] = sum_imag;
     }
