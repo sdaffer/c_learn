@@ -33,7 +33,7 @@ int main() {
     printf("max = %f\n", max);
 
     // calculate fourier transform
-    dat_c_arr dft = calc_fourier_transform(&data);
+    dat_c_arr dft = calc_dft(&data);
 
     // testing
     double max_a = rmax_dat_c_arr(&dft);
